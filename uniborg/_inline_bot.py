@@ -24,14 +24,12 @@ async def _(event):
             bot_username,
             search_query
         )
-        i = 0
-        for result in bot_results:
+        for i, result in enumerate(bot_results):
             output_message += "{} {} `{}`\n\n".format(
                 result.title,
                 result.description,
                 ".icb " + bot_username + " " + str(i + 1) + " " + search_query
             )
-            i = i + 1
         await event.edit(output_message)
     except Exception as e:
         await event.edit("{} did not respond correctly, for **{}**!\n\
@@ -65,13 +63,19 @@ if Config.TG_BOT_USER_NAME_BF_HER is not None and tgbot is not None:
         builder = event.builder
         result = None
         query = event.text
-        if event.sender_id == borg.uid and query.startswith("@UniBorg"):
-            rev_text = query[::-1]
+        if event.sender_id == borg.uid and query.startswith("@UniBorg "):
+            try:
+                _, ko, pno = query.split(" ")
+                actual_text = borg._iiqsixfourstore[ko][pno]
+                del borg._iiqsixfourstore[ko]
+            except IndexError:
+                actual_text = query
             buttons = paginate_help(0, borg._plugins, "helpme")
             result = builder.article(
                 "© @UniBorg",
                 text="{}\nCurrently Loaded Plugins: {}".format(
-                    query, len(borg._plugins)),
+                    actual_text, len(borg._plugins)
+                ),
                 buttons=buttons,
                 link_preview=False,
                 parse_mode="html"
@@ -155,10 +159,7 @@ All instaructions to run @UniBorg in your PC has been explained in https://githu
 def paginate_help(page_number, loaded_plugins, prefix):
     number_of_rows = Config.NO_OF_BUTTONS_DISPLAYED_IN_H_ME_CMD
     number_of_cols = 2
-    helpable_plugins = []
-    for p in loaded_plugins:
-        if not p.startswith("_"):
-            helpable_plugins.append(p)
+    helpable_plugins = [p for p in loaded_plugins if not p.startswith("_")]
     helpable_plugins = sorted(helpable_plugins)
     modules = [custom.Button.inline(
         "{} {}".format("✅", x),

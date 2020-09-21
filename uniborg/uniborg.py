@@ -29,6 +29,7 @@ class Uniborg(TelegramClient):
         self._name = "LoggedIn"
         self._logger = logging.getLogger("UniBorg")
         self._plugins = {}
+        self._iiqsixfourstore = {}
         self.n_plugin_path = n_plugin_path
         self.db_plugin_path = db_plugin_path
         self.config = api_config
@@ -78,10 +79,10 @@ class Uniborg(TelegramClient):
             if to_load:
                 self._logger.info("Modules to LOAD: ")
                 self._logger.info(to_load)
-            if NO_LOAD:
-                for plugin_name in NO_LOAD:
-                    if plugin_name in self._plugins:
-                        self.remove_plugin(plugin_name)
+        if NO_LOAD:
+            for plugin_name in NO_LOAD:
+                if plugin_name in self._plugins:
+                    self.remove_plugin(plugin_name)
 
 
     async def _async_init(self, **kwargs):
