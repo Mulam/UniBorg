@@ -70,13 +70,9 @@ class Config:
         ).split()}
     # specify LOAD and NO_LOAD
     LOAD = []
-    # foloowing plugins won't work on Heroku,
+    # folowing plugins won't work on Heroku,
     # because of their ephemeral file system
-    NO_LOAD = [
-        "fwd",
-        "telegraph",
-        "gban"
-    ]
+    NO_LOAD = []
     # Get your own API key from https://www.remove.bg/ or
     # feel free to use http://telegram.dog/Remove_BGBot
     REM_BG_API_KEY = os.environ.get("REM_BG_API_KEY", None)
@@ -116,9 +112,6 @@ class Config:
     # taken from https://github.com/jaskaranSM/UniBorg/blob/9072e3580cc6c98d46f30e41edbe73ffc9d850d3/sample_config.py#L104-L106
     GOOGLE_CHROME_DRIVER = os.environ.get("GOOGLE_CHROME_DRIVER", None)
     GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN", None)
-    #
-    LYDIA_API = os.environ.get("LYDIA_API", None)
-    #
     # JustWatch Country
     WATCH_COUNTRY = os.environ.get("WATCH_COUNTRY","IN")
     # leave this blank, should be automatically filled for Heroku.com users
@@ -146,7 +139,6 @@ class Config:
         "LT_QOAN_NOE_FF_MPEG_URL",
         None
     )
-
 
 
 class Production(Config):

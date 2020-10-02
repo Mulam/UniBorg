@@ -1,6 +1,6 @@
-# This Source Code Form is subject to the terms of the GNU
-# General Public License, v.3.0. If a copy of the GPL was not distributed with this
-# file, You can obtain one at https://www.gnu.org/licenses/gpl-3.0.en.html
+# UniBorg Telegram UseRBot 
+# Copyright (C) 2020 @UniBorg
+
 """Uploads Files to Telegram
 Available Commands:
 .upload <Path To File>
@@ -13,14 +13,8 @@ import time
 from datetime import datetime
 from hachoir.metadata import extractMetadata
 from hachoir.parser import createParser
-from telethon import events
 from telethon.tl.types import DocumentAttributeVideo
 from telethon.tl.types import DocumentAttributeAudio
-from uniborg.util import (
-    progress,
-    admin_cmd,
-    take_screen_shot
-)
 
 
 thumb_image_path = Config.TMP_DOWNLOAD_DIRECTORY + "/thumb_image.jpg"
@@ -31,12 +25,13 @@ def get_lst_of_files(input_directory, output_lst):
     for file_name in filesinfolder:
         current_file_name = os.path.join(input_directory, file_name)
         if os.path.isdir(current_file_name):
-            return get_lst_of_files(current_file_name, output_lst)
-        output_lst.append(current_file_name)
+            output_lst = get_lst_of_files(current_file_name, output_lst)
+        if os.path.isfile(current_file_name):
+            output_lst.append(current_file_name)
     return output_lst
 
 
-@borg.on(admin_cmd(pattern="uploadir (.*)"))
+@borg.on(utils.admin_cmd(pattern="uploadir (.*)"))
 async def _(event):
     if event.fwd_from:
         return
@@ -120,7 +115,7 @@ async def _(event):
                         thumb=thumb,
                         attributes=document_attributes,
                         # progress_callback=lambda d, t: asyncio.get_event_loop().create_task(
-                        #     progress(d, t, event, c_time, "trying to upload")
+                        #     utils.progress(d, t, event, c_time, "trying to upload")
                         # )
                     )
                 except Exception as e:
@@ -144,7 +139,7 @@ async def _(event):
         await event.edit("404: Directory Not Found")
 
 
-@borg.on(admin_cmd(pattern="upload (.*)", allow_sudo=True))
+@borg.on(utils.admin_cmd(pattern="upload (.*)", allow_sudo=True))
 async def _(event):
     if event.fwd_from:
         return
@@ -168,7 +163,7 @@ async def _(event):
             reply_to=event.message.id,
             thumb=thumb,
             progress_callback=lambda d, t: asyncio.get_event_loop().create_task(
-                progress(d, t, mone, c_time, "trying to upload")
+                utils.progress(d, t, mone, c_time, "trying to upload")
             )
         )
         end = datetime.now()
@@ -179,7 +174,7 @@ async def _(event):
         await mone.edit("404: File Not Found")
 
 
-@borg.on(admin_cmd(pattern="uploadasstream (.*)", allow_sudo=True))
+@borg.on(utils.admin_cmd(pattern="uploadasstream (.*)", allow_sudo=True))
 async def _(event):
     if event.fwd_from:
         return
@@ -212,7 +207,7 @@ async def _(event):
         if os.path.exists(thumb_image_path):
             thumb = thumb_image_path
         else:
-            thumb = await take_screen_shot(
+            thumb = await utils.take_screen_shot(
                 file_name,
                 Config.TMP_DOWNLOAD_DIRECTORY,
                 duration // 2
@@ -240,7 +235,7 @@ async def _(event):
                     )
                 ],
                 progress_callback=lambda d, t: asyncio.get_event_loop().create_task(
-                    progress(d, t, mone, c_time, "trying to upload")
+                    utils.progress(d, t, mone, c_time, "trying to upload")
                 )
             )
         except Exception as e:
