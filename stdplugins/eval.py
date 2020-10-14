@@ -12,11 +12,11 @@ import sys
 import io
 
 
-@borg.on(utils.admin_cmd(pattern="eval"))
+@borg.on(slitu.admin_cmd(pattern="eval"))
 async def _(event):
     if event.fwd_from or event.via_bot_id:
         return
-    await event.edit("Processing ...")
+    s_m_ = await event.edit("Processing ...")
     cmd = event.text.split(" ", maxsplit=1)[1]
     reply_to_id = event.message.id
     if event.reply_to_msg_id:
@@ -29,7 +29,7 @@ async def _(event):
     stdout, stderr, exc = None, None, None
 
     try:
-        await aexec(cmd, event)
+        await aexec(cmd, s_m_)
     except Exception:
         exc = traceback.format_exc()
 
@@ -38,39 +38,35 @@ async def _(event):
     sys.stdout = old_stdout
     sys.stderr = old_stderr
 
-    evaluation = ""
+    evaluation = "😐"
     if exc:
         evaluation = exc
     elif stderr:
         evaluation = stderr
     elif stdout:
         evaluation = stdout
-    else:
-        evaluation = "Success"
 
     final_output = "**EVAL**: `{}` \n\n **OUTPUT**: \n`{}` \n".format(cmd, evaluation)
 
     if len(final_output) > Config.MAX_MESSAGE_SIZE_LIMIT:
         with io.BytesIO(str.encode(final_output)) as out_file:
             out_file.name = "eval.text"
-            await borg.send_file(
-                event.chat_id,
-                out_file,
-                force_document=True,
-                allow_cache=False,
-                caption=cmd,
-                reply_to=reply_to_id
+            await s_m_.reply(
+                cmd,
+                file=out_file
             )
             await event.delete()
     else:
-        await event.edit(final_output)
+        await s_m_.edit(final_output)
 
 
-async def aexec(code, event):
-    p = lambda _x: print(utils.yaml_format(_x))
+async def aexec(code, smessatatus):
+    message = event = smessatatus
+    p = lambda _x: print(slitu.yaml_format(_x))
     reply = await event.get_reply_message()
     exec(
         f'async def __aexec(message, reply, client, p): ' +
+        '\n event = smessatatus = message' +
         ''.join(f'\n {l}' for l in code.split('\n'))
     )
-    return await locals()['__aexec'](event, reply, event.client, p)
+    return await locals()['__aexec'](message, reply, message.client, p)
